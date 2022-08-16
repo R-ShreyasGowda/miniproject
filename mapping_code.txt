@@ -1,0 +1,732 @@
+----------------CUSTOMER-DIMENSION----------------------------------
+create table team1_country
+(
+country_id	number(5) primary key,
+country_name varchar2(20)
+)
+
+insert into team1_country values (201,'india');
+insert into team1_country values (202,'south africa');
+insert into team1_country values (203,'england');
+insert into team1_country values (204,'australia');
+insert into team1_country values (205,'newzealand');
+
+select * from  team1_country;
+
+drop table team1_country;
+
+create table team1_state
+(
+state_id number(5)primary key,	
+state_name varchar2(20),
+country_id number(5) references team1_country(country_id)
+);
+
+insert into team1_state values (301,'karnataka',201);
+insert into team1_state values (302,'delhi',201);
+insert into team1_state values (303,'mumbai',201);
+insert into team1_state values (304,'kolkata',201);
+insert into team1_state values (305,'punjab',201);
+insert into team1_state values (306,'chennai',201);
+insert into team1_state values (307,'yorkshire',203);
+insert into team1_state values (308,'sydney',204);
+insert into team1_state values (309,'melbourne',204);
+insert into team1_state values (310,'gutenga province',202);
+insert into team1_state values (311,'wellington',205);
+insert into team1_state values (312,'auckland',205);
+insert into team1_state values (313,'kerala',201);
+
+select * from team1_state;
+
+drop table team1_state;
+
+create table team1_city		
+(
+city_id number(5)primary key,
+city_name varchar2(20),
+state_id number(5)  references team1_state(state_id)
+);
+
+insert into team1_city values(401,'bangalore',301);
+insert into team1_city values(402,'mysore',301);
+insert into team1_city values(403,'andheri',303);
+insert into team1_city values(404,'bandra',303);
+insert into team1_city values(405,'agra',302);
+insert into team1_city values(406,'dum dum',304);
+insert into team1_city values(407,'kochi',313);
+insert into team1_city values(408,'madurai',306);
+insert into team1_city values(409,'amritsar',305);
+insert into team1_city values(410,'wellsford',312);
+insert into team1_city values(411,'southbank',309);
+insert into team1_city values(412,'leeds',307);
+insert into team1_city values(413,'johnsberg',310);
+
+drop table team1_city
+
+create table team1_customer_type	
+(
+cust_type_code	number(5)primary key,
+customer_type_desc varchar2(20)
+);
+
+insert into team1_customer_type values (101,'loyal');
+insert into team1_customer_type values (102,'impulse');
+insert into team1_customer_type values (103,'discount');
+insert into team1_customer_type values (104,'need-based');
+insert into team1_customer_type values (105,'wandering');
+
+
+create table team1_customer	
+(
+cust_id number(5)primary key,
+cust_name varchar2(30),
+cust_phone number(12),
+cust_email varchar2(30),
+cust_dob date,
+cust_address varchar2(30),
+cust_type_code  number(5) references team1_customer_type(cust_type_code),
+city_id	 number(5) references team1_city(city_id),
+state_id  number(5)references team1_state(state_id),
+country_id  number(5) references team1_country(country_id)
+);
+
+insert into team1_customer values(1,'viart kohli',7869372876,'virat@gmail.com','05-02-1994','agra',101,405,302,201);
+insert into team1_customer values(2,'joe root',8765986543,'joe@gmail.com','15-11-1944','paris',101,412,307,203);
+insert into team1_customer values(3,'rohit sharma',6352847102,'rohit@gmail.com','15-01-1995','bombay',102,403,303,201);
+insert into team1_customer values(4,'steve smith',9836457281,'rashid@gmail.com','05-04-1996','gabba',101,411,309,204);
+insert into team1_customer values(5,'shikar dhawan',9673256172,'shikar@gmail.com','05-02-1994','sonipat',101,405,302,201);
+insert into team1_customer values(6,'saurav ganguly',9857364251,'saurav@gmail.com','15-11-1944','eden gardens',105,406,304,201);
+insert into team1_customer values(7,'kapil dev',8364728912,'kapil@gmail.com','15-01-1995','gopalpur',101,406,304,201);
+insert into team1_customer values(8,'gautham gambir',7485619201,'gautham@gmail.com','05-04-1996','kondli',104,405,302,201);
+insert into team1_customer values(9,'kane williamson',6528190235,'kane@gmail.com','25-01-2001','hamilton',101,410,312,205);
+insert into team1_customer values(10,'abd villiers',9857263425,'abd@gmail.com','18-05-1998','cape town',101,413,310,202);
+insert into team1_customer values(11,'yuvraj singh',8736291029,'yuvraj@gmail.com','08-02-1985','mohali',103,409,305,201);
+insert into team1_customer values(12,'ravi ashwin',8948372634,'ravi@gmail.com','21-12-2001','madurai',102,408,306,201);
+insert into team1_customer values(13,'sanju samason',9993773833,'sanju@gmail.com','09-11-1980','kasargodu',101,407,313,201);
+insert into team1_customer values(14,'kl rahul',9376633362,'rahul@gmail.com','12-12-2010','mg road',104,401,301,201);
+insert into team1_customer values(15,'manish pandey',9287763542,'manish@gmail.com','11-04-2012','yeshwanthpura',101	,402,301,201);
+
+select * from team1_customer;
+
+drop table team1_customer
+
+create table team1_cust_dim
+(
+cust_sur_id	number(5)primary key,
+cust_id	 number(5),
+cust_name varchar2(30),
+cust_type_desc varchar2(30), 
+cust_email varchar2(30), 
+cust_phone number(12),	
+city_name varchar2(30), 
+state_name varchar2(30), 
+country_name varchar2(30), 
+crt_user varchar2(30), 
+crt_dt date
+)
+
+select * from team1_cust_dim;
+
+
+create or replace procedure sp_cusdim as 
+   cursor cur_cusdim is
+     select cust_id,cust_name,customer_type_desc,cust_email,cust_phone,city_name,state_name,country_name
+     from  team1_country c,team1_state s,team1_city c1,team1_customer c2,team1_customer_type c3
+     where c.country_id=s.country_id
+     and s.state_id=c1.state_id
+     and c1.city_id=c2.city_id
+     and c2.cust_type_code=c3.cust_type_code;
+     v_count number(5);
+begin
+   for i in cur_cusdim loop
+       select count(*) into v_count
+       from team1_cust_dim
+       where cust_id=i.cust_id
+       and cust_phone=i.cust_phone;
+    if v_count=0 then 
+         insert into team1_cust_dim values(cus_dim_id.nextval,i.cust_id,i.cust_name,i.customer_type_desc,
+         i.cust_email,i.cust_phone,i.city_name, i.state_name, i.country_name,user,sysdate);
+    end if;
+end loop;
+end;
+
+set serveroutput on
+
+exec sp_cusdim
+
+select * from team1_cust_dim
+
+
+-------------------PRODUCT-DIMENSION------------------------------
+
+create table team1_prod_manufacture
+(
+manufact_id	number(5)primary key,
+manufact_name varchar2(20),
+manufact_email	varchar2(20),
+manufact_phone number(12),
+city_id	 number(5) references team1_city(city_id),
+state_id  number(5)references team1_state(state_id),
+country_id  number(5) references team1_country(country_id)
+)
+insert into team1_prod_manufacture values (801,'Parle','Parle@gmail.com',9575654525,405,302,201);
+insert into team1_prod_manufacture values (802,'boat','boat@gmail.com',6543254525,412,307,203);
+insert into team1_prod_manufacture values (803,'lenevo','lenevo@gmail.com',7484714525,403,303,201);
+insert into team1_prod_manufacture values (804,'reynolds','reynolds@gmail.com',7653281923,411,309,204);
+insert into team1_prod_manufacture values (805,'apsara','apsara@gmail.com',8637462314,405,302,201);
+insert into team1_prod_manufacture values (806,'sony','sony@gmail.com',9787574727,406,304,201);
+insert into team1_prod_manufacture values (807,'ashley','ashley@gmail.com',9513463242,406,304,201);
+insert into team1_prod_manufacture values (808,'philips','philips@gmail.com',9573354525,405,302,201);
+insert into team1_prod_manufacture values (809,'legend','legend@gmail.com',9513463243,410,312,205);
+insert into team1_prod_manufacture values (810,'whirlpool','whirlpool@gmail.com',9875643211,413,310,202);
+insert into team1_prod_manufacture values (811,'voltas','voltas@gmail.com',6543763523,409,305,201);
+
+create table team1_products	
+(
+product_id number(5) primary key,
+prod_name varchar2(20),
+prod_family varchar2(30),
+prod_category varchar2(20),
+manufact_id number(5)references team1_prod_manufacture(manufact_id),
+cost number(10),
+wholesale_price number(10),
+retail_price number(10),	
+product_in_hand number(5),
+launch_date date
+)
+
+insert into team1_products values (700,'television','electronics','home electronics',806,50000,35000,60000,20,'05-02-1994');
+insert into team1_products values (701,'washing machine','electronics','home electronics',810,80000,60000,100000,10,'15-11-1944');
+insert into team1_products values (702,'pen','stationary','stationary',804,50,30,70,500,'15-01-1995');
+insert into team1_products values (703,'pencil','stationary','stationary',805,10,5,20,400,'05-04-1996');
+insert into team1_products values (704,'book','stationary','stationary',809,100,70,150,200,'05-02-1994');
+insert into team1_products values (705,'bulb','electronics','home electronics',808,200,160,250,100,'15-11-1944');
+insert into team1_products values (706,'dinning table','furnitures','home furnitures',807,10000,8500,13000,25,'15-01-1995');
+insert into team1_products values (707,'mobile','electronics','office electronics',803,20000,18000,25000,50,'05-04-1996');
+insert into team1_products values (708,'study table','furnituers','home furnitures',807,4000,3500,5000,15,'25-01-2001');
+insert into team1_products values (709,'laptop','electronics','office electronics',803,35000,30000,40000,8,'22-04-2020');
+insert into team1_products values (710,'earphones','electronics','home electronics',802,500,400,600,12,'13-12-2021');
+insert into team1_products values (711,'pordium','furnituers','office furnitures',807,5000,4500,6000,18,'29-03-2020');
+insert into team1_products values (712,'ac','electronics','office electronics',811,100000,85000,120000,3,'19-06-2019');
+insert into team1_products values (713,'bench','furnitures','office furnitures',807,2000,1800,2500,50,'20-11-2018');
+insert into team1_products values (714,'table','furnituers','home furnitures',807,1000,7500,1250,100,'24-05-2020');
+insert into team1_products values (715,'theatre','electronics','office electronics',806,50000,40000,60000,10,'20-05-2019');
+insert into team1_products values (716,'headphone','electronics','home electronics',802,3500,3000,4000,25,'20-02-1999');
+insert into team1_products values (717,'bingo','food','spicy',801,40,30,50,100,'16-05-2000');
+insert into team1_products values (718,'chocolates','food','sweet',801,200,150,300,200,'27-05-2020');
+insert into team1_products values (719,'biscuits','food','sweet',801,100,70,150,150,'13-09-2017');
+insert into team1_products values (720,'chips','food','spicy',801,50,35,70,234,'13-01-2000');
+
+
+create table team1_prod_dim
+(
+prod_dim_id	number(5)primary key,
+prod_id number(5),
+prod_name varchar2(20),
+prod_family varchar2(40),
+prod_category varchar2(40),
+cost number(10),
+wholesale_price number(10),
+retail_price number(10),
+product_in_hand number(10),
+launch_date date,
+manufact_name	varchar2(30),
+manufact_email varchar2(30),
+manufact_phone	number(12),
+city_name	varchar2(20),
+state_name varchar2(20),
+country_name	varchar2(20),
+crt_user varchar2(20),
+crt_dt date,
+cur_rec_ind varchar2(5)
+)
+drop table team1_prod_dim
+
+
+create or replace procedure sp_prod_dim as
+ cursor cur_prod_dim is
+   select product_id,prod_name,prod_family,prod_category,cost,wholesale_price,retail_price,product_in_hand,
+   launch_date,manufact_name,manufact_email,manufact_phone,city_name,state_name,country_name
+   from team1_products p,team1_prod_manufacture p1,team1_country c,team1_state s,team1_city c1
+     where p.manufact_id=p1.manufact_id
+     and p1.country_id=c.country_id
+     and p1.state_id=s.state_id
+     and p1.city_id=c1.city_id;
+     v_count number(5);
+begin
+   for i in cur_prod_dim loop
+       select count(*) into v_count
+       from team1_prod_dim
+       where prod_id=i.product_id
+       and cost=i.cost;
+    if v_count=0 then 
+         insert into team1_prod_dim values(prod_dim_id.nextval,i.product_id,i.prod_name,i.prod_family,i.prod_category,
+         i.cost,i.wholesale_price,i.retail_price,i.product_in_hand,i.launch_date,
+         i.manufact_name,i.manufact_email,i.manufact_phone,i.city_name,i.state_name,i.country_name,user,sysdate,'Y');
+         update team1_prod_dim set crt_user=sysdate-1,cur_rec_ind='N'
+        where prod_id=i.product_id and cost!=i.cost;
+    end if;
+end loop;
+end;
+
+exec sp_prod_dim
+
+create sequence prod_dim_id
+select * from team1_prod_dim;
+select * from emp
+
+
+------------------STAFF-DIMENSION---------------------------------
+create table team1_staff
+(
+emp_id number(5)primary key,
+emp_name varchar2(20),
+emp_dob date,
+emp_phone number(12),
+emp_email varchar2(20),
+emp_job	varchar2(40),
+emp_address varchar2(30),
+hiredate date,
+emp_ctc number(10),
+city_id	 number(5) references team1_city(city_id),
+state_id  number(5)references team1_state(state_id),
+country_id  number(5) references team1_country(country_id)
+)
+
+insert into team1_staff values (501,'chiru','05-11-1988',8759390213,'chiru@gmail.com','billing associate','ganapatipura','12-01-2020',40000,405,302,201);
+insert into team1_staff values (502,'yashu','30-06-1986',8759390214,'yashu@gmail.com','associate billing analyst','konankunte','13-01-2020',50000,412,307,203);
+insert into team1_staff values (503,'pradeep','05-05-2002',8759390215,'pradeep@gmail.com','billing specialist','sharada nagar','14-01-2020',10000,403,303,201);
+insert into team1_staff values (504,'mahendra','27-01-1990',8759390216,'mahendra@gmail.com','billing co-ordinate','btm','15-01-2020',25000,411,309,204);
+insert into team1_staff values (505,'shravani','02-08-1979',8759390217,'shravani@gmail.com','billing and collection','jayanagar','16-01-2020',40000,405,302,201);
+insert into team1_staff values (506,'sagar','14-01-1993',8759390218,'sagar@gmail.com','billing associate','mg road','17-01-2020',24000,406,304,201);
+insert into team1_staff values (507,'dixit','06-07-1998',8759390219,'dixit@gmail.com','associate billing analyst','belandur','18-01-2020',55000,406,304,201);
+insert into team1_staff values (508,'mahesh','13-03-1990',8759390220,'mahesh@gmail.com','billing specialist','penya','19-01-2020',15000,405,302,201);
+insert into team1_staff values (509,'amrutha','28-12-1999',8759390221,'amrutha@gmail.com','billing co-ordinate','lalbagh','20-01-2020',30000,410,312,205);
+insert into team1_staff values (510,'monisha','28-03-1989',8759390222,'monisha@gmail.com','billing and collection','maddur','21-01-2020',40000,413,310,202);
+insert into team1_staff values (511,'ashwini','08-09-2006',8759390223,'ashwini@gmail.com','billing associate','mandya','22-01-2020',50000,409,305,201);
+insert into team1_staff values (512,'vijya','09-10-1998',8759390224,'vijay@gmail.com','associate billing analyst','ramanagar','23-01-2020',10000,408,306,201);
+insert into team1_staff values (513,'irappa','15-06-1985',8759390225,'irappa@gmail.com','billing specialist','bommasandra','24-01-2020',25000,407,313,201);
+insert into team1_staff values (514,'pardha sarathi','18-05-1960',8759390226,'pardha@gmail.com','billing co-ordinate','harinagar','25-01-2020',40000,401,301,201);
+insert into team1_staff values (515,'praveen','24-04-1970',8759390227,'praveen@gmail.com','billing and collection','chunchgatta','26-01-2020',35000,402,301,201);
+
+select * from team1_staff
+
+create table team1_staff_dim	
+(
+emp_dim_id number(5)primary key,
+emp_id number(5),
+emp_name varchar2(20),
+emp_dob date,
+emp_phone  number(10),
+emp_email	varchar2(30),
+emp_job varchar2(40),
+emp_address varchar2(30),
+hiredate date,
+emp_ctc	 number(10),
+city_name varchar2(30),
+state_name varchar2(30),
+country_name varchar2(30),
+crt_user varchar2(40),
+crt_dt date
+)
+
+
+create or replace procedure sp_staff_dim as
+  cursor cur_staff_dim is
+     select emp_id,emp_name,emp_dob,emp_phone,emp_email,emp_job,emp_address,hiredate,emp_ctc,city_name,state_name,country_name	
+     from  team1_country c,team1_state s,team1_city c1,team1_staff s1
+     where c.country_id=s1.country_id
+     and s.state_id=s1.state_id
+     and c1.city_id=s1.city_id;
+     v_count number(5);
+begin
+   for i in cur_staff_dim loop
+       select count(*) into v_count
+       from team1_staff_dim
+       where emp_id=i.emp_id
+       and emp_phone=i.emp_phone;
+    if v_count=0 then 
+         insert into team1_staff_dim values(emp_dim_id.nextval,i.emp_id,i.emp_name,i.emp_dob,i.emp_phone,
+         i.emp_email,i.emp_job,i.emp_address,i.hiredate,i.emp_ctc,i.city_name, i.state_name,i.country_name,user,sysdate);
+    end if;
+end loop;
+end;
+
+exec sp_staff_dim
+
+set serveroutput on
+select * from team1_staff_dim;
+select * from team1_staff;
+
+create sequence emp_dim_id;
+
+
+
+------------------SHOP-DIMENSION---------------------------------
+
+
+create table team1_shops
+(
+shop_id	number(5) primary key,
+shop_name varchar2(20),
+shop_address varchar2(20),
+zip_code number(10),
+shop_owner  varchar2(30),
+owned_flag varchar2(5),
+open_date date,
+city_id	 number(5) references team1_city(city_id),
+state_id  number(5)references team1_state(state_id),
+country_id  number(5) references team1_country(country_id)
+);
+
+
+insert into team1_shops values (601,'anitha super market','42 prasanna road',560021,'anithadevi','y','23-Aug-22',406,304,201);
+insert into team1_shops values (602,'locksmith','85 Bremner Way',7890,'smith','y','24-Jan-22',412,307,203);
+insert into team1_shops values (603,'warner market','33 Magnolia Street',5082,'candy warner','y','15-Apr-12',411,309,204);
+insert into team1_shops values (604,'pollock bazar','140 Wallace Road',23,'van der dussen','n','06-Oct-21',413,310,202);
+insert into team1_shops values (605,'janatha super bazar','4890 Loredo Avenue',560078,'ashok','n','27-Dec-20',402,301,201);
+insert into team1_shops values (607,'neesham collections','540 Forres Street',1148,'jimmy neesham','y','09-Mar-20',410,312,205);
+insert into team1_shops values (606,'ganesh stores','83 3rd cross jpnagar',560062,'ganesh','y','18-Sep-15',405,302,201);
+
+
+create table team1_shop_dim	
+(
+shop_dim_id number(5)primary key,
+shop_id	number(5),
+shop_name varchar2(20),
+shop_address varchar2(20),
+zip_code number(10),
+shop_owner  varchar2(30),
+owned_flag varchar2(5),
+open_date date,
+city_name varchar2(20),
+state_name varchar2(20),
+country_name varchar2(20),	
+crt_user varchar2(30),
+crt_dt date
+)
+
+select * from team1_shop_dim;
+select * from team1_shops;
+
+create or replace procedure sp_shop_dim as
+  cursor cur_shop_dim is
+    select shop_id,shop_name,shop_address,zip_code,shop_owner,owned_flag,open_date,city_name,state_name,country_name
+    from team1_shops s, team1_country c,team1_state s1,team1_city c1
+     where s.country_id=c.country_id
+     and s.state_id=s1.state_id
+     and s.city_id=c1.city_id;
+     v_count number(5);
+begin
+   for i in cur_shop_dim loop
+       select count(*) into v_count
+       from team1_shop_dim
+       where shop_id=i.shop_id
+       and shop_name=i.shop_name
+       and shop_owner=i.shop_owner;
+      if v_count=0 then 
+         insert into team1_shop_dim values(shop_dim_id.nextval,i.shop_id,i.shop_name,i.shop_address,i.zip_code,
+         i.shop_owner,i.owned_flag,i.open_Date,i.city_name,i.state_name,i.country_name,user,sysdate);
+    end if;
+end loop;
+end;
+
+exec sp_shop_dim;
+
+select * from team1_shop_dim;
+
+select * from team1_shops;
+
+create sequence shop_dim_id;
+
+select * from s_article_dimension;
+select * from s_calender_dimension;
+select * from s_shop_dimension;
+select * from s_shop_facts;
+
+select count(*)
+from s_shop_facts
+
+
+
+-----------------CALENDER-DIMENSION----------------------------------------
+create sequence date_id
+
+create table team1_calender_dimension
+(date_id int primary key,
+cal_date date,
+day_number_of_week int,
+day_number_of_month int,
+day_number_of_year int,
+week_no_of_month int,
+week_no_in_year int,
+month_in_number int,
+month_short_name varchar(20),
+month_full_name varchar(20),
+quarter_number int,
+CALENDER_YEAR NUMBER(10)
+)
+
+drop table team1_calender_dimension
+
+
+create or replace procedure sp_datedim(v_year varchar2)as
+start_date date;
+end_date date;
+v_count number;
+begin
+start_date := trunc(to_date(v_year,'YY'),'YY');
+end_date := add_months(start_date,12)-1;
+while start_date<=end_date loop
+     insert into team1_calender_dimension 
+(select date_id.nextval,start_date,
+    to_char(start_date,'D'),
+    to_char(start_date,'DD'),
+    to_char(start_date,'DDD'),
+    to_char(start_date,'W'),
+    to_char(start_date,'WW'),
+    to_char(start_date,'MM'),
+    to_char(start_date,'MON'),
+    to_char(start_date,'MONTH'),
+    to_char(start_date,'Q'),
+    to_char(sysdate,'YYYY')
+from dual);
+start_date := start_date + 1;
+end loop;
+end;
+
+exec sp_datedim('2017')
+
+select * from  team1_calender_dimension
+select count(*) from 
+team1_calender_dimension
+
+----------------------PAYMENT-DIMESION------------------
+
+create table team1_payment_method	
+(
+pay_method_code number(5)primary key,
+pay_method varchar2(20),
+pay_method_desc varchar2(50)
+)
+
+insert into team1_payment_method values(1201,'cash','hand cash payment');
+insert into team1_payment_method values(1202,'upi','QR code scan payment');
+insert into team1_payment_method values(1203,'card','swipe card cash payment');
+insert into team1_payment_method values(1204,'online','net banking payment');
+
+create table team1_payment_method_dimension	
+(
+pay_dim_id number(5) primary key,
+pay_method_code number(5),
+pay_method varchar2(20),
+pay_method_desc varchar2(50)
+)
+
+create sequence pay_dim_id;
+
+create or replace procedure sp_pay_dim as
+cursor cur_paydim is
+   select * 
+   from team1_payment_method;
+    v_count number(5);
+begin
+   for i in cur_paydim loop
+    select count(*) into v_count
+    from team1_payment_method_dimension
+    where pay_method_code=i.pay_method_code;
+      if v_count=0 then
+        insert into team1_payment_method_dimension values(pay_dim_id.nextval,i.pay_method_code,i.pay_method,i.pay_method_desc);
+      end if;
+   end loop;
+end;
+
+exec sp_pay_dim;
+
+select * from team1_payment_method_dimension;
+
+-------------------------SALES_FACT------------------------------------
+
+create table team1_sales_transaction		
+(
+transaction_id number(5) primary key,
+cust_id	number(5) references team1_customer(cust_id),
+shop_id	number(5) references team1_shops(shop_id),
+emp_id	number(5) references team1_staff(emp_id),
+txn_date date,
+txn_wholesale_price number(10),
+txn_retail_price number(10),
+sales_amount number(10)
+)
+select * from team1_sales_transaction;
+
+insert into team1_sales_transaction values (1000,4,606,505,'09-04-2022',0,13000,13000);
+insert into team1_sales_transaction values (1001,3,605,515,'12-09-2022',18000,0,360000);
+insert into team1_sales_transaction values (1002,12,602,502,'03-12-2022',0,5000,45000);
+insert into team1_sales_transaction values (1003,6,604,503,'15-10-2022',0,40000,40000);
+insert into team1_sales_transaction values (1004,15,601,506,'18-01-2022',400,0,217500);
+insert into team1_sales_transaction values (1005,7,605,507,'21-08-2022',4500,0,45000);
+insert into team1_sales_transaction values (1006,3,606,508,'27-02-2022',85000,0,425000);
+insert into team1_sales_transaction values (1007,8,607,509,'25-03-2022',1800,0,180000);
+insert into team1_sales_transaction values (1008,10,603,504,'15-08-2017',0,1250,1250);
+insert into team1_sales_transaction values (1009,1,601,507,'10-09-2013',0,60000,120000);
+insert into team1_sales_transaction values (1010,5,	604,510,'30-09-2010',3000,0,150000);
+insert into team1_sales_transaction values (1011,13,602,511,'20-10-2004',0,60000,120000);
+insert into team1_sales_transaction values (1012,2,605,	512,'21-12-2000',0,100000,100000);
+
+select * from team1_sales_transaction;
+
+create table team1_sales_transaction_fact
+(
+sales_tran_fact_id	number(5)primary key,
+transaction_id number(5)references team1_sales_transaction(transaction_id),
+cust_sur_id	 number(5)references team1_cust_dim(cust_sur_id),
+shop_dim_id	number(5)references team1_shop_dim(shop_dim_id),
+prod_dim_id	number(5)references team1_prod_dim(prod_dim_id),
+emp_dim_id	number(5)references team1_staff_dim(emp_dim_id),
+date_id	number(5)references team1_calender_dimension(date_id),
+quantity number(10),
+txn_wholesale_price	number(10),
+txn_retail_price number(10),
+sales_amount number(10),
+crt_user varchar2(40),
+crt_dt date
+)
+
+select * from team1_sales_transaction_fact;
+
+
+create or replace procedure sp_sales_fact as
+cursor cur_sales_fact is
+   select t1.transaction_id,t3.cust_sur_id,t5.shop_dim_id,t4.prod_dim_id,t6.emp_dim_id,t7.date_id,quantity,txn_wholesale_price,txn_retail_price,sales_amount
+   from team1_sales_transaction t1,team1_product_in_trans t2,team1_cust_dim t3,team1_prod_dim t4,team1_shop_dim t5,
+         team1_staff_dim t6,team1_calender_dimension t7
+   where t2.transaction_id=t1.transaction_id
+   and t1.cust_id=t3.cust_id
+   and t1.shop_id=t5.shop_id
+   and t2.product_id=t4.prod_id
+   and t1.emp_id=t6.emp_id
+   and t1.txn_date=t7.cal_date;
+   v_count number(5);
+begin
+   for i in cur_sales_fact loop
+     select count(*) into v_count
+     from team1_sales_transaction_fact
+     where transaction_id=i.transaction_id;
+      if v_count=0 then 
+        insert into team1_sales_transaction_fact values (sales_fact_id.nextval,i.transaction_id,i.cust_sur_id,i.shop_dim_id,i.prod_dim_id,
+        i.emp_dim_id,i.date_id,i.quantity,i.txn_wholesale_price,i.txn_retail_price,i.sales_amount,user,sysdate);
+      end if;
+    end loop;
+end;
+
+exec sp_sales_fact
+
+select * from team1_sales_transaction_fact
+
+
+-------------------PAYMENT FACT----------------------------------------------
+
+create table team1_payment	
+(
+payment_id	number(5)primary key,
+pay_method_code	number(5) references team1_payment_method(pay_method_code),
+transaction_id	number(5) references team1_sales_transaction(transaction_id),
+payment_amount number(10)
+);
+
+drop table team1_payment;
+
+insert into team1_payment values (900,1203,1000,13000);
+insert into team1_payment values (901,1201,1001,360000);
+insert into team1_payment values (902,1203,1002,45000);
+insert into team1_payment values (903,1204,1003,40000);
+insert into team1_payment values (904,1202,1004,217500);
+insert into team1_payment values (905,1203,1005,45000);
+insert into team1_payment values (906,1201,1006,425000);
+insert into team1_payment values (907,1203,1007,180000);
+insert into team1_payment values (908,1203,1008,1250);
+insert into team1_payment values (909,1201,1009,120000);
+insert into team1_payment values (910,1203,1010,150000);
+insert into team1_payment values (911,1204,1011,120000);
+insert into team1_payment values (912,1202,1012,100000);
+
+
+create table team1_product_in_trans
+(
+product_id	number(5) references team1_products(product_id),
+transaction_id	number(5) references team1_sales_transaction(transaction_id),
+quantity number(10)
+)
+select * from team1_product_in_trans;
+
+insert into team1_product_in_trans values (706,1000,1);
+insert into team1_product_in_trans values (707,1001,20);
+insert into team1_product_in_trans values (708,1002,1);
+insert into team1_product_in_trans values (709,1003,1);
+insert into team1_product_in_trans values (710,1004,50);
+insert into team1_product_in_trans values (711,1005,10);
+insert into team1_product_in_trans values (712,1006,5);
+insert into team1_product_in_trans values (713,1007,100);
+insert into team1_product_in_trans values (714,1008,1);
+insert into team1_product_in_trans values (715,1009,2);
+insert into team1_product_in_trans values (716,1010,50);
+insert into team1_product_in_trans values (700,1011,2);
+insert into team1_product_in_trans values (701,1012,1);
+insert into team1_product_in_trans values (713,1004,75);
+insert into team1_product_in_trans values (710,1002,100);
+insert into team1_product_in_trans values (714,1004,2);
+insert into team1_product_in_trans values (715,1004,1);
+
+
+create table team1_pay_fact	
+(
+pay_fact_id number(5),
+payment_id number(5) references team1_payment(payment_id),
+cust_sur_id	number(5)references team1_cust_dim(cust_sur_id),
+shop_dim_id number(5)references team1_shop_dim(shop_dim_id),
+emp_dim_id	number(5)references team1_staff_dim(emp_dim_id),
+payment_date_id	number(5) references team1_calender_dimension(date_id),
+pay_method_code	number(5) references team1_payment_method(pay_method_code),
+payment_amount number(10),
+crt_user varchar2(40),
+crt_dt date
+);
+
+drop table team1_pay_fact;
+
+create sequence pay_fact_id;
+
+select * from team1_sales_transaction_fact;
+
+create or replace procedure sp_pay_fact as
+  cursor cur_pay_fact is
+    select payment_id,cust_sur_id,shop_dim_id,emp_dim_id,date_id,pay_method_code,payment_amount
+    from team1_sales_transaction t1,team1_product_in_trans t2,team1_cust_dim t3,team1_payment t4,team1_shop_dim t5,
+         team1_staff_dim t6,team1_calender_dimension t7
+    where t2.transaction_id=t1.transaction_id
+   and t1.cust_id=t3.cust_id
+   and t1.shop_id=t5.shop_id
+   and t1.transaction_id=t4.transaction_id
+   and t1.emp_id=t6.emp_id
+   and t1.txn_date=t7.cal_date;
+   v_count number(5);
+begin
+   for i in cur_pay_fact loop
+     select count(*) into v_count
+     from team1_pay_fact
+     where payment_id=i.payment_id;
+      if v_count=0 then 
+        insert into team1_pay_fact values (pay_fact_id.nextval,i.payment_id,i.cust_sur_id,i.shop_dim_id,i.emp_dim_id,
+        i.date_id,i.pay_method_code,i.payment_amount,user,sysdate);
+      end if;
+    end loop;
+end;
+
+set serveroutput on
+
+exec sp_pay_fact
+
+select * from team1_pay_fact;
+
+create sequence pay_fact_id;
